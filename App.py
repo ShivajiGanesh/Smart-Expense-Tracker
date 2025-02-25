@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Define the directory and CSV file path
 DATA_DIR = "data"
@@ -91,34 +89,27 @@ elif page == "Budget & Insights":
     st.subheader("📈 Budget & Smart Insights")
     df = load_data()
     
-    # Determine budget dynamically based on spending pattern
-    total_spent = df["Amount"].sum() if not df.empty else 0
-    avg_monthly_spent = total_spent / 3 if total_spent else 5000  # Default to 5000 if no data
-    budget = st.number_input("Set Monthly Budget (₹)", min_value=avg_monthly_spent * 0.5, value=avg_monthly_spent, step=500.0)
-    
-    # Function to generate insights
-    def get_insights(df, budget):
-        if df.empty:
-            return "No expenses recorded yet."
-        
-        insights = []
-        category_spending = df.groupby("Category")["Amount"].sum()
+    if df.empty:
+        st.warning("🚨 No expenses recorded yet.")
+    else:
         total_spent = df["Amount"].sum()
+        avg_monthly_spend = total_spent / max(len(pd.to_datetime(df["Date"]).dt.to_period("M").unique()), 1)
+        budget = max(avg_monthly_spend * 1.2, 5000)  # Dynamic budget based on spending pattern
         
+        # Generate insights
+        insights = []
         if total_spent > budget:
             insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
-        elif total_spent > budget * 0.8:
+        if total_spent > budget * 0.8:
             insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
         
+        category_spending = df.groupby("Category")["Amount"].sum()
         for category, amount in category_spending.items():
             if category == "Food" and amount > total_spent * 0.5:
                 insights.append("🍔 You're spending a lot on Food! Consider meal planning to save money.")
-            elif category == "Transport" and amount > total_spent * 0.3:
+            if category == "Transport" and amount > total_spent * 0.3:
                 insights.append("🚗 High transport costs! Try public transport or carpooling.")
-            elif category == "Shopping" and amount > total_spent * 0.3:
+            if category == "Shopping" and amount > total_spent * 0.3:
                 insights.append("🛍️ Excessive shopping detected! Set a shopping limit to avoid overspending.")
         
-        return "\n".join(insights) if insights else "✅ Your spending is well-balanced!"
-
-    insights = get_insights(df, budget)
-    st.write(insights)
+        st.write("\n".join(insights) if insights else "✅ Your spending is well-balanced!")
