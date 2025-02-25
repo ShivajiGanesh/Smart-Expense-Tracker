@@ -96,6 +96,8 @@ elif page == "Budget & Insights":
         avg_monthly_spend = total_spent / max(len(pd.to_datetime(df["Date"]).dt.to_period("M").unique()), 1)
         budget = max(avg_monthly_spend * 1.2, 5000)  # Dynamic budget based on spending pattern
         
+        st.write(f"📊 Your estimated budget: ₹{budget:.2f}")
+        
         # Generate insights
         insights = []
         if total_spent > budget:
