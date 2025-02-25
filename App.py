@@ -3,15 +3,16 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 import database  # Our database module
+import analysis  # Module for visualizations
 
 # ---- Streamlit UI ----
 st.title("💰 Smart Expense Tracker")
 
-# Debug: Show database file information
+# Debug: Display database file information.
 st.write("Database file exists:", os.path.exists(database.DATABASE_PATH))
 st.write("Database file path:", os.path.abspath(database.DATABASE_PATH))
 
-# Sidebar Navigation
+# Sidebar navigation.
 st.sidebar.header("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Add Expense", "View Expenses", "Analysis"])
 
@@ -45,10 +46,8 @@ elif page == "View Expenses":
 # ---- Analysis ----
 elif page == "Analysis":
     st.subheader("📊 Expense Analysis")
-    df = database.get_expenses()
-    if not df.empty:
-        fig, ax = plt.subplots()
-        sns.barplot(x="category", y="amount", data=df, ax=ax)
+    fig = analysis.plot_expense_distribution()
+    if fig:
         st.pyplot(fig)
     else:
         st.warning("No data available for analysis.")
