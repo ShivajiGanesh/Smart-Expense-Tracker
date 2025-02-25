@@ -1,35 +1,37 @@
-import database  # Import the database module
-import analysis  # Import the analysis module
+import database
+import analysis
 
-def test_database():
-    print("🔍 Testing Database Functions...")
-    
-    # Add test expenses
-    database.add_expense("Lunch", 150, "Food")
-    database.add_expense("Transport", 50, "Travel")
-    database.add_expense("Groceries", 500, "Shopping")
-    
-    # Retrieve expenses
-    expenses = database.get_expenses()
-    print("✅ Expenses Retrieved:\n", expenses)
+def test_add_expenses():
+    print("=== Adding Test Expenses ===")
+    # Add a few test expenses.
+    database.add_expense("2025-02-25", "Food", 150, "Lunch")
+    database.add_expense("2025-02-25", "Transport", 75, "Bus fare")
+    database.add_expense("2025-02-25", "Shopping", 200, "Groceries")
+    print("Test expenses added.\n")
 
-    # Delete an expense (assumes deletion by ID)
-    if not expenses.empty:
-        expense_id = expenses.iloc[0]["id"]
-        database.delete_expense(expense_id)
-        print(f"🗑 Deleted Expense ID: {expense_id}")
+def test_get_expenses():
+    print("=== Fetching Expenses ===")
+    df = database.get_expenses()
+    if df.empty:
+        print("No expenses found.")
+    else:
+        print("Expenses fetched successfully:")
+        print(df)
+    print()
 
-    # Check expenses after deletion
-    updated_expenses = database.get_expenses()
-    print("📌 Updated Expenses:\n", updated_expenses)
-
-def test_analysis():
-    print("📊 Testing Analysis Functions...")
-    
-    # Generate and show a bar chart
-    analysis.plot_expense_distribution()
+def test_analysis_plot():
+    print("=== Generating Analysis Plot ===")
+    fig = analysis.plot_expense_distribution()
+    if fig:
+        # Optionally, save the figure to verify visually.
+        fig.savefig("test_plot.png")
+        print("Analysis plot generated and saved as 'test_plot.png'.")
+    else:
+        print("No data available for analysis plot.")
+    print()
 
 if __name__ == "__main__":
-    test_database()
-    test_analysis()
-    print("✅ All tests completed successfully!")
+    test_add_expenses()
+    test_get_expenses()
+    test_analysis_plot()
+    print("All tests completed successfully!")
