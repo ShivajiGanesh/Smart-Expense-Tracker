@@ -58,6 +58,14 @@ elif page == "View Expenses":
         st.warning("🚨 No expenses recorded yet.")
     else:
         st.dataframe(df)
+          # Add Download CSV Button
+        csv_data = df.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="⬇️ Download CSV", 
+            data=csv_data, 
+            file_name="expenses.csv", 
+            mime="text/csv"
+        )
     # Add a reset button
     if st.button("🗑 Reset All Expenses"):
         df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
