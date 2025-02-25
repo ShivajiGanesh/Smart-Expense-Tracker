@@ -2,11 +2,15 @@ import streamlit as st
 import pandas as pd
 import os
 
-# CSV file path
-CSV_FILE = "expenses.csv"
+# Define a fixed directory for storing the CSV file
+DATA_DIR = "data"
+CSV_FILE = os.path.join(DATA_DIR, "expenses.csv")
 
-# Ensure CSV file exists
-if not os.path.exists(CSV_FILE):
+# Ensure the data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# Ensure CSV file exists with correct headers
+if not os.path.exists(CSV_FILE) or os.path.getsize(CSV_FILE) == 0:
     df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
     df.to_csv(CSV_FILE, index=False)
 
@@ -16,8 +20,8 @@ st.title("💰 Smart Expense Tracker - CSV Based")
 st.sidebar.header("Navigation")
 page = st.sidebar.radio("Go to", ["Home", "Add Expense", "View Expenses", "Analysis"])
 
-# Function to load data from CSV
-@st.cache
+# Function to load data from CSV (forces reload every time)
+@st.cache_data
 def load_data():
     return pd.read_csv(CSV_FILE)
 
