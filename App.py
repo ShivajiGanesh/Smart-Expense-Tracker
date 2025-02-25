@@ -1,12 +1,15 @@
 import streamlit as st
-import pandas as pd
+import os
 import matplotlib.pyplot as plt
 import seaborn as sns
-import sqlite3
-import database  # Import database functions
+import database  # Our database module
 
 # ---- Streamlit UI ----
 st.title("💰 Smart Expense Tracker")
+
+# Debug: Show database file information
+st.write("Database file exists:", os.path.exists(database.DATABASE_PATH))
+st.write("Database file path:", os.path.abspath(database.DATABASE_PATH))
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
@@ -20,14 +23,12 @@ if page == "Home":
 # ---- Add Expense ----
 elif page == "Add Expense":
     st.subheader("📝 Add a New Expense")
-    
     with st.form("expense_form"):
         date = st.date_input("Date")
         category = st.selectbox("Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
         amount = st.number_input("Amount (₹)", min_value=1.0)
         description = st.text_area("Description")
         submit = st.form_submit_button("Add Expense")
-    
     if submit:
         database.add_expense(date, category, amount, description)
         st.success("Expense added successfully!")
@@ -45,7 +46,6 @@ elif page == "View Expenses":
 elif page == "Analysis":
     st.subheader("📊 Expense Analysis")
     df = database.get_expenses()
-    
     if not df.empty:
         fig, ax = plt.subplots()
         sns.barplot(x="category", y="amount", data=df, ax=ax)
