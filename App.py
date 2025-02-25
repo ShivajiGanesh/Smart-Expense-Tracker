@@ -93,28 +93,28 @@ elif page == "Budget & Insights":
     df = load_data()
 
     # Function to generate insights
-def get_insights(df, budget):
-    if df.empty:
-        return "No expenses recorded yet."
-    
-    insights = []
-    category_spending = df.groupby("Category")["Amount"].sum()
-    total_spent = df["Amount"].sum()
-    
-    if total_spent > budget:
-        insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
-    elif total_spent > budget * 0.8:
-        insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
-    
-    for category, amount in category_spending.items():
-        if category == "Food" and amount > total_spent * 0.5:
-            insights.append("🍔 You're spending a lot on Food! Consider meal planning to save money.")
-        elif category == "Transport" and amount > total_spent * 0.3:
-            insights.append("🚗 High transport costs! Try public transport or carpooling.")
-        elif category == "Shopping" and amount > total_spent * 0.3:
-            insights.append("🛍️ Excessive shopping detected! Set a shopping limit to avoid overspending.")
-    
-    return "\n".join(insights) if insights else "✅ Your spending is well-balanced!"
+    def get_insights(df, budget):
+        if df.empty:
+            return "No expenses recorded yet."
+        
+        insights = []
+        category_spending = df.groupby("Category")["Amount"].sum()
+        total_spent = df["Amount"].sum()
+        
+        if total_spent > budget:
+            insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
+        elif total_spent > budget * 0.8:
+            insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
+        
+        for category, amount in category_spending.items():
+            if category == "Food" and amount > total_spent * 0.5:
+                insights.append("🍔 You're spending a lot on Food! Consider meal planning to save money.")
+            elif category == "Transport" and amount > total_spent * 0.3:
+                insights.append("🚗 High transport costs! Try public transport or carpooling.")
+            elif category == "Shopping" and amount > total_spent * 0.3:
+                insights.append("🛍️ Excessive shopping detected! Set a shopping limit to avoid overspending.")
+        
+        return "\n".join(insights) if insights else "✅ Your spending is well-balanced!"
 
     insights = get_insights(df, budget)
     st.write(insights)
