@@ -1,11 +1,13 @@
 import sqlite3
 import pandas as pd
 
-# Function to get a persistent database connection
-def get_connection():
-    return sqlite3.connect("expenses.db", check_same_thread=False)
+# Use a persistent connection
+DATABASE_FILE = "expenses.db"
 
-# Ensure table is created on startup
+def get_connection():
+    return sqlite3.connect(DATABASE_FILE, check_same_thread=False)
+
+# Ensure table exists
 def initialize_database():
     conn = get_connection()
     cursor = conn.cursor()
@@ -21,31 +23,25 @@ def initialize_database():
     conn.commit()
     conn.close()
 
-# Initialize the database
-initialize_database()
+initialize_database()  # Call on startup
 
-# Function to add an expense
+# Add an expense
 def add_expense(date, category, amount, description):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO expenses (date, category, amount, description) VALUES (?, ?, ?, ?)", 
+        cursor.execute("INSERT INTO expenses (date, category, amount, description) VALUES (?, ?, ?, ?)",
                        (str(date), category, float(amount), description))
         conn.commit()
-        print("✅ Expense added successfully!")  # Debugging message
+        print("✅ Expense added successfully!")
     except Exception as e:
-        print(f"❌ Error adding expense: {e}")  # Debugging message
+        print(f"❌ Error adding expense: {e}")
     finally:
         conn.close()
 
-# Function to get all expenses
+# Fetch all expenses
 def get_expenses():
     conn = get_connection()
-    try:
-        df = pd.read_sql("SELECT * FROM expenses", conn)  # Fetch data
-    except Exception as e:
-        print(f"❌ Error fetching expenses: {e}")  # Debugging message
-        df = pd.DataFrame()  # Return an empty DataFrame if error occurs
-    finally:
-        conn.close()
+    df = pd.read_sql("SELECT * FROM expenses", conn)
+    conn.close()
     return df
