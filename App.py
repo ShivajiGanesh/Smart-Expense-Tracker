@@ -1,53 +1,41 @@
 import streamlit as st
-import os
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import database  # Our database module
-import analysis  # Module for visualizations
 
-# ---- Streamlit UI ----
-st.title("💰 Smart Expense Tracker")
+st.title("💰 Smart Expense Tracker - CSV Sample Data")
 
-# Debug: Display database file information.
-st.write("Database file exists:", os.path.exists(database.DATABASE_PATH))
-st.write("Database file path:", os.path.abspath(database.DATABASE_PATH))
-
-# Sidebar navigation.
+# Sidebar Navigation
 st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Add Expense", "View Expenses", "Analysis"])
+page = st.sidebar.radio("Go to", ["Home", "View Data", "Analysis"])
 
-# ---- Home Page ----
+@st.cache  # Cache the result to avoid reloading on every interaction
+def load_data():
+    # Load sample data from the CSV file named "money spend.csv"
+    df = pd.read_csv("money spend.csv")
+    return df
+
+# Load data from CSV
+expense_data = load_data()
+
+# Home Page
 if page == "Home":
-    st.write("### Welcome to Smart Expense Tracker!")
-    st.write("Use this app to track your expenses efficiently.")
+    st.write("### Welcome!")
+    st.write("This app uses predefined expense data from the CSV file 'money spend.csv'.")
 
-# ---- Add Expense ----
-elif page == "Add Expense":
-    st.subheader("📝 Add a New Expense")
-    with st.form("expense_form"):
-        date = st.date_input("Date")
-        category = st.selectbox("Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
-        amount = st.number_input("Amount (₹)", min_value=1.0)
-        description = st.text_area("Description")
-        submit = st.form_submit_button("Add Expense")
-    if submit:
-        database.add_expense(date, category, amount, description)
-        st.success("Expense added successfully!")
+# View Data Page
+elif page == "View Data":
+    st.write("### Expense Data")
+    st.dataframe(expense_data)
 
-# ---- View Expenses ----
-elif page == "View Expenses":
-    st.subheader("📄 Your Expenses")
-    df = database.get_expenses()
-    if not df.empty:
-        st.dataframe(df)
-    else:
-        st.warning("No expenses recorded yet.")
-
-# ---- Analysis ----
+# Analysis Page
 elif page == "Analysis":
-    st.subheader("📊 Expense Analysis")
-    fig = analysis.plot_expense_distribution()
-    if fig:
+    st.write("### Expense Analysis")
+    if not expense_data.empty:
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.barplot(x="category", y="amount", data=expense_data, ax=ax)
+        ax.set_title("Expense Distribution by Category")
+        plt.xticks(rotation=45)
         st.pyplot(fig)
     else:
         st.warning("No data available for analysis.")
