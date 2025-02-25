@@ -1,12 +1,12 @@
 import sqlite3
 import pandas as pd
 
-# Function to establish a database connection
+# Persistent connection function
 def get_connection():
     conn = sqlite3.connect("expenses.db", check_same_thread=False)
     return conn
 
-# Create table if it doesn't exist
+# Ensure table is created
 def initialize_database():
     conn = get_connection()
     cursor = conn.cursor()
@@ -22,7 +22,7 @@ def initialize_database():
     conn.commit()
     conn.close()
 
-# Initialize the database on import
+# Initialize database at the start
 initialize_database()
 
 # Function to add an expense
@@ -42,6 +42,6 @@ def add_expense(date, category, amount, description):
 # Function to get all expenses
 def get_expenses():
     conn = get_connection()
-    df = pd.read_sql("SELECT * FROM expenses", conn)
+    df = pd.read_sql("SELECT * FROM expenses", conn)  # Read from the same database
     conn.close()
     return df
