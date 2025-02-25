@@ -1,11 +1,12 @@
 import sqlite3
 import pandas as pd
+import os
 
-# Use a persistent connection
-DATABASE_FILE = "expenses.db"
+# Use a persistent database path
+DATABASE_PATH = os.path.join(os.path.dirname(__file__), "expenses.db")
 
 def get_connection():
-    return sqlite3.connect(DATABASE_FILE, check_same_thread=False)
+    return sqlite3.connect(DATABASE_PATH, check_same_thread=False)
 
 # Ensure table exists
 def initialize_database():
