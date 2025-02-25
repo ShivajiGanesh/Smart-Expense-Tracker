@@ -1,41 +1,63 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import os
 
-st.title("💰 Smart Expense Tracker - CSV Sample Data")
+# CSV file path
+CSV_FILE = "expenses.csv"
+
+# Ensure CSV file exists
+if not os.path.exists(CSV_FILE):
+    df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
+    df.to_csv(CSV_FILE, index=False)
+
+st.title("💰 Smart Expense Tracker - CSV Based")
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "View Data", "Analysis"])
+page = st.sidebar.radio("Go to", ["Home", "Add Expense", "View Expenses", "Analysis"])
 
-@st.cache  # Cache the result to avoid reloading on every interaction
+# Function to load data from CSV
+@st.cache
 def load_data():
-    # Load sample data from the CSV file named "money spend.csv"
-    df = pd.read_csv("money spend.csv")
-    return df
+    return pd.read_csv(CSV_FILE)
 
-# Load data from CSV
-expense_data = load_data()
+# Function to add an expense and update the CSV file
+def add_expense(date, category, amount, description):
+    df = pd.read_csv(CSV_FILE)
+    new_expense = pd.DataFrame([[date, category, amount, description]], 
+                               columns=["Date", "Category", "Amount", "Description"])
+    df = pd.concat([df, new_expense], ignore_index=True)
+    df.to_csv(CSV_FILE, index=False)
+    st.success("Expense added successfully!")
 
 # Home Page
 if page == "Home":
     st.write("### Welcome!")
-    st.write("This app uses predefined expense data from the CSV file 'money spend.csv'.")
+    st.write("Track your expenses and analyze them with this CSV-based system.")
 
-# View Data Page
-elif page == "View Data":
-    st.write("### Expense Data")
-    st.dataframe(expense_data)
+# Add Expense Page
+elif page == "Add Expense":
+    st.subheader("📝 Add a New Expense")
+    date = st.date_input("Date")
+    category = st.selectbox("Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
+    amount = st.number_input("Amount (₹)", min_value=1.0)
+    description = st.text_area("Description")
+
+    if st.button("Add Expense"):
+        add_expense(date, category, amount, description)
+
+# View Expenses Page
+elif page == "View Expenses":
+    st.subheader("📄 Your Expenses")
+    df = load_data()
+    st.dataframe(df)
 
 # Analysis Page
 elif page == "Analysis":
-    st.write("### Expense Analysis")
-    if not expense_data.empty:
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.barplot(x="category", y="amount", data=expense_data, ax=ax)
-        ax.set_title("Expense Distribution by Category")
-        plt.xticks(rotation=45)
-        st.pyplot(fig)
+    st.subheader("📊 Expense Analysis")
+    df = load_data()
+
+    if not df.empty:
+        st.bar_chart(df.groupby("Category")["Amount"].sum())
     else:
         st.warning("No data available for analysis.")
