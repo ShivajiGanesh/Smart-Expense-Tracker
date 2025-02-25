@@ -89,9 +89,13 @@ elif page == "Analysis":
 # Budget & Insights Page
 elif page == "Budget & Insights":
     st.subheader("📈 Budget & Smart Insights")
-    budget = st.number_input("Set Monthly Budget (₹)", min_value=1000.0, value=5000.0)
     df = load_data()
-
+    
+    # Determine budget dynamically based on spending pattern
+    total_spent = df["Amount"].sum() if not df.empty else 0
+    avg_monthly_spent = total_spent / 3 if total_spent else 5000  # Default to 5000 if no data
+    budget = st.number_input("Set Monthly Budget (₹)", min_value=avg_monthly_spent * 0.5, value=avg_monthly_spent, step=500.0)
+    
     # Function to generate insights
     def get_insights(df, budget):
         if df.empty:
@@ -118,9 +122,3 @@ elif page == "Budget & Insights":
 
     insights = get_insights(df, budget)
     st.write(insights)
-
-    if not df.empty:
-        st.subheader("📉 Monthly Spending Trend")
-        df["Date"] = pd.to_datetime(df["Date"])
-        df.set_index("Date", inplace=True)
-        st.line_chart(df.resample("M")["Amount"].sum())
