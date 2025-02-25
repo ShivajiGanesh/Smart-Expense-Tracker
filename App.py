@@ -58,6 +58,11 @@ elif page == "View Expenses":
         st.warning("🚨 No expenses recorded yet.")
     else:
         st.dataframe(df)
+    # Add a reset button
+    if st.button("🗑 Reset All Expenses"):
+        df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
+        df.to_csv(CSV_FILE, index=False)
+        st.warning("🚨 All expenses have been cleared!")
 
 # Analysis Page
 elif page == "Analysis":
