@@ -85,48 +85,35 @@ elif page == "Analysis":
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
 
-        # Set modern visualization style
-        plt.style.use("ggplot")
-
         fig, ax = plt.subplots(figsize=(9, 5))
 
-        # Gradient background inside the graph
-        ax.set_facecolor("#1e1e2e")  # Dark theme background
-        fig.patch.set_facecolor("#262626")  # Outer background
+        # Light grey background inside the graph
+        ax.set_facecolor("#f2f2f2")  
+        fig.patch.set_facecolor("#ffffff")  # White outer background
 
-        # Check trend: Use different colors for increase/decrease
-        colors = ['#00c853' if df["Amount"].iloc[i] >= df["Amount"].iloc[i - 1] else '#d50000' 
-                  for i in range(1, len(df))]
+        # Plot line in pastel purple with light blue markers
+        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', 
+                color='#d9b3ff', linewidth=2.5, markerfacecolor='#99ddff')
 
-        # Line plot with changing color
-        for i in range(1, len(df)):
-            ax.plot(df["Date"].iloc[i - 1:i + 1], df["Amount"].iloc[i - 1:i + 1], 
-                    marker='o', markersize=8, markerfacecolor=colors[i - 1], 
-                    linestyle='-', color=colors[i - 1], linewidth=2.5)
-
-        # Shaded fill under line
-        ax.fill_between(df["Date"], df["Amount"], color='#ff8f00', alpha=0.2)
-
-        # Add data labels
+        # Data labels in black for readability
         for i, row in df.iterrows():
             ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", 
-                    fontsize=10, verticalalignment='bottom', color="#ffffff", fontweight="bold")
+                    fontsize=10, verticalalignment='bottom', color="black", fontweight="bold")
 
-        # Labels & Title
-        ax.set_xlabel("Date", fontsize=12, color="#ffffff", fontweight="bold")
-        ax.set_ylabel("Amount Spent (₹)", fontsize=12, color="#ffffff", fontweight="bold")
-        ax.set_title("📈 Spending Trend Analysis", fontsize=15, fontweight="bold", color="#ff9100")
+        # Labels & Title in black
+        ax.set_xlabel("Date", fontsize=12, color="black", fontweight="bold")
+        ax.set_ylabel("Amount Spent (₹)", fontsize=12, color="black", fontweight="bold")
+        ax.set_title("📈 Spending Trend Analysis", fontsize=15, fontweight="bold", color="black")
 
-        # Grid for clarity
-        ax.grid(color='#616161', linestyle='--', linewidth=0.7, alpha=0.7)
+        # Light grey grid for clarity
+        ax.grid(color='#d9d9d9', linestyle='--', linewidth=0.7, alpha=0.7)
 
-        plt.xticks(rotation=45, color="#ffffff")
-        plt.yticks(color="#ffffff")
+        plt.xticks(rotation=45, color="black")
+        plt.yticks(color="black")
 
         st.pyplot(fig)
     else:
         st.warning("🚨 No data available for analysis.")
-
 
 # Budget & Insights Page
 elif page == "Budget & Insights":
