@@ -88,7 +88,7 @@ elif page == "Analysis":
         fig, ax = plt.subplots(figsize=(9, 5))
 
         # Light grey background inside the graph
-        ax.set_facecolor("#f2f2f2")  
+        ax.set_facecolor("#d1d1d1")  
         fig.patch.set_facecolor("#ffffff")  # White outer background
 
         # Plot line in pastel purple with light blue markers
