@@ -77,6 +77,7 @@ elif page == "View Expenses":
         st.warning("🚨 All expenses have been cleared!")
 
 # Analysis Page
+# Analysis Page
 elif page == "Analysis":
     st.subheader("📊 Expense Analysis")
     df = load_data()
@@ -87,13 +88,13 @@ elif page == "Analysis":
 
         fig, ax = plt.subplots(figsize=(9, 5))
 
-        # Light grey background inside the graph
-        ax.set_facecolor("#d1d1d1")  
+        # Slightly darker grey background inside the graph for better visibility
+        ax.set_facecolor("#a6a6a6")  
         fig.patch.set_facecolor("#ffffff")  # White outer background
 
         # Plot line in pastel purple with light blue markers
         ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', 
-                color='#d9b3ff', linewidth=2.5, markerfacecolor='#99ddff')
+                color='#d9b3ff', linewidth=2.5, markerfacecolor='#66ccff')
 
         # Data labels in black for readability
         for i, row in df.iterrows():
@@ -105,8 +106,8 @@ elif page == "Analysis":
         ax.set_ylabel("Amount Spent (₹)", fontsize=12, color="black", fontweight="bold")
         ax.set_title("📈 Spending Trend Analysis", fontsize=15, fontweight="bold", color="black")
 
-        # Light grey grid for clarity
-        ax.grid(color='#d9d9d9', linestyle='--', linewidth=0.7, alpha=0.7)
+        # Grid with slightly darker grey for better visibility
+        ax.grid(color='#c2c2c2', linestyle='--', linewidth=0.8, alpha=0.8)
 
         plt.xticks(rotation=45, color="black")
         plt.yticks(color="black")
@@ -114,6 +115,7 @@ elif page == "Analysis":
         st.pyplot(fig)
     else:
         st.warning("🚨 No data available for analysis.")
+
 
 # Budget & Insights Page
 elif page == "Budget & Insights":
