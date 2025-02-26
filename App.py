@@ -77,44 +77,52 @@ elif page == "View Expenses":
         st.warning("🚨 All expenses have been cleared!")
 
 # Analysis Page
-# Analysis Page
 elif page == "Analysis":
     st.subheader("📊 Expense Analysis")
     df = load_data()
 
     if not df.empty:
+        # Ensure 'Date' is in datetime format and sort data
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
 
-        fig, ax = plt.subplots(figsize=(9, 5))
+        # Create a figure and axis with a specific size
+        fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Slightly darker grey background inside the graph for better visibility
-        ax.set_facecolor("#a6a6a6")  
-        fig.patch.set_facecolor("#ffffff")  # White outer background
+        # Set a slightly darker grey background for visibility
+        ax.set_facecolor("#c0c0c0")  # Medium grey background
+        fig.patch.set_facecolor("#ffffff")  # White background for the figure
 
-        # Plot line in pastel purple with light blue markers
-        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', 
-                color='#d9b3ff', linewidth=2.5, markerfacecolor='#66ccff')
+        # Plot connected scatterplot
+        ax.plot(df["Date"], df["Amount"], linestyle="-", color="#002147",  # Dark blue line
+                linewidth=2, alpha=0.9)  
 
-        # Data labels in black for readability
+        # Scatter plot for individual data points
+        ax.scatter(df["Date"], df["Amount"], color="#ff6700", edgecolor="black",  # Orange dots with black edge
+                   s=80, zorder=3)  # Size increased for better visibility
+
+        # Annotate each point
         for i, row in df.iterrows():
-            ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", 
-                    fontsize=10, verticalalignment='bottom', color="black", fontweight="bold")
+            ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.0f}",
+                    fontsize=9, verticalalignment='bottom', color="black", fontweight="bold")
 
-        # Labels & Title in black
+        # Set labels and title
         ax.set_xlabel("Date", fontsize=12, color="black", fontweight="bold")
         ax.set_ylabel("Amount Spent (₹)", fontsize=12, color="black", fontweight="bold")
         ax.set_title("📈 Spending Trend Analysis", fontsize=15, fontweight="bold", color="black")
 
-        # Grid with slightly darker grey for better visibility
-        ax.grid(color='#c2c2c2', linestyle='--', linewidth=0.8, alpha=0.8)
+        # Customize grid lines
+        ax.grid(color='#8c8c8c', linestyle='--', linewidth=0.7, alpha=0.7)  
 
+        # Rotate x-axis labels for better readability
         plt.xticks(rotation=45, color="black")
         plt.yticks(color="black")
 
+        # Display the plot
         st.pyplot(fig)
     else:
         st.warning("🚨 No data available for analysis.")
+
 
 
 # Budget & Insights Page
