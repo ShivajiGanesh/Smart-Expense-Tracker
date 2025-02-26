@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Define the directory and CSV file path
 DATA_DIR = "data"
@@ -84,14 +85,19 @@ elif page == "Analysis":
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
         
+        # Modern graph with background
+        sns.set(style="darkgrid")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.set_facecolor("#f4f4f4")  # Light background
+        
         sns.lineplot(x=df["Date"], y=df["Amount"], marker='o', linestyle='-', color='b', ax=ax)
         
         for i, row in df.iterrows():
             ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", fontsize=9, verticalalignment='bottom')
         
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Amount Spent (₹)")
-        ax.set_title("Spending Trend")
+        ax.set_xlabel("Date", fontsize=12)
+        ax.set_ylabel("Amount Spent (₹)", fontsize=12)
+        ax.set_title("Spending Trend", fontsize=14, fontweight='bold')
         plt.xticks(rotation=45)
         
         st.pyplot(fig)
@@ -106,23 +112,18 @@ elif page == "Budget & Insights":
     if df.empty:
         st.warning("🚨 No expenses recorded yet.")
     else:
-        salary = st.number_input("💵 Enter Your Monthly Salary (₹)", min_value=1000.0)
-        daily_budget = salary / 30
         total_spent = df["Amount"].sum()
-        estimated_budget = salary  # Full monthly salary as budget
+        avg_monthly_spend = total_spent / max(len(pd.to_datetime(df["Date"]).dt.to_period("M").unique()), 1)
+        budget = avg_monthly_spend * 1.2  # Dynamic budget based on spending pattern
         
-        st.write(f"📊 Your estimated monthly budget: ₹{estimated_budget:.2f}")
+        st.write(f"📊 Your estimated budget: ₹{budget:.2f}")
         st.write(f"💰 Total spent so far: ₹{total_spent:.2f}")
         
         insights = []
-        percentage_spent = (total_spent / estimated_budget) * 100 if estimated_budget > 0 else 0
-        
-        if total_spent > estimated_budget:
+        if total_spent > budget:
             insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
-        elif percentage_spent > 80:
+        if total_spent > budget * 0.8:
             insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
-        elif percentage_spent < 50:
-            insights.append("✅ You're on track! Keep up the good spending habits.")
         
         category_spending = df.groupby("Category")["Amount"].sum()
         for category, amount in category_spending.items():
