@@ -112,6 +112,7 @@ elif page == "Budget & Insights":
         budget = avg_monthly_spend * 1.2  # Dynamic budget based on spending pattern
         
         st.write(f"📊 Your estimated budget: ₹{budget:.2f}")
+        st.write(f"💰 Total spent so far: ₹{total_spent:.2f}")
         
         insights = []
         if total_spent > budget:
