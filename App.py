@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 
 # Define the directory and CSV file path
 DATA_DIR = "data"
@@ -42,7 +43,6 @@ if page == "Home":
 # Add Expense Page
 elif page == "Add Expense":
     st.subheader("📝 Add a New Expense")
-    salary = st.number_input("💼 Enter Your Monthly Salary (₹)", min_value=1000.0, value=30000.0)
     date = st.date_input("📅 Date")
     category = st.selectbox("📂 Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
     amount = st.number_input("💰 Amount (₹)", min_value=1.0)
@@ -81,7 +81,21 @@ elif page == "Analysis":
     df = load_data()
     
     if not df.empty:
-        st.bar_chart(df.groupby("Category")["Amount"].sum())
+        df["Date"] = pd.to_datetime(df["Date"])
+        df = df.sort_values("Date")
+        
+        fig, ax = plt.subplots()
+        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', color='b')
+        
+        for i, row in df.iterrows():
+            ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", fontsize=9, verticalalignment='bottom')
+        
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Amount Spent (₹)")
+        ax.set_title("Spending Trend")
+        plt.xticks(rotation=45)
+        
+        st.pyplot(fig)
     else:
         st.warning("🚨 No data available for analysis.")
 
@@ -94,18 +108,15 @@ elif page == "Budget & Insights":
         st.warning("🚨 No expenses recorded yet.")
     else:
         total_spent = df["Amount"].sum()
-        salary = st.number_input("💼 Enter Your Monthly Salary (₹)", min_value=1000.0, value=30000.0)
-        daily_budget = salary / 30
-        monthly_budget = salary
+        avg_monthly_spend = total_spent / max(len(pd.to_datetime(df["Date"]).dt.to_period("M").unique()), 1)
+        budget = avg_monthly_spend * 1.2  # Dynamic budget based on spending pattern
         
-        st.write(f"📊 Your estimated daily budget: ₹{daily_budget:.2f}")
-        st.write(f"📊 Your estimated monthly budget: ₹{monthly_budget:.2f}")
+        st.write(f"📊 Your estimated budget: ₹{budget:.2f}")
         
-        # Generate insights
         insights = []
-        if total_spent > monthly_budget:
+        if total_spent > budget:
             insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
-        if total_spent > monthly_budget * 0.8:
+        if total_spent > budget * 0.8:
             insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
         
         category_spending = df.groupby("Category")["Amount"].sum()
