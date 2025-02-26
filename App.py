@@ -84,8 +84,7 @@ elif page == "Analysis":
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
         
-        fig, ax = plt.subplots()
-        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', color='b')
+        sns.lineplot(x=df["Date"], y=df["Amount"], marker='o', linestyle='-', color='b', ax=ax)
         
         for i, row in df.iterrows():
             ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", fontsize=9, verticalalignment='bottom')
