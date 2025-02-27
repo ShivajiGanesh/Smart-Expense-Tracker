@@ -85,7 +85,7 @@ elif page == "Analysis":
         df["Date"] = pd.to_datetime(df["Date"])
         df = df.sort_values("Date")
         
-        fig, ax = plt.subplots(figsize=(8, 5))
+        fig, ax = plt.subplots(figsize=(8, 5), facecolor="white")  # White outer background
         ax.set_facecolor("#dcdcdc")  # Light grey background (similar to the webpage)
         
         ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', color='#FF6700', linewidth=2, markersize=6, markerfacecolor='#002147')  # Orange line & Dark Blue dots
@@ -103,6 +103,7 @@ elif page == "Analysis":
         st.pyplot(fig)
     else:
         st.warning("🚨 No data available for analysis.")
+
 
 # Budget & Insights Page
 elif page == "Budget & Insights":
