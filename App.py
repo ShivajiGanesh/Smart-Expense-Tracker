@@ -81,7 +81,8 @@ elif page == "Analysis":
     df = load_data()
     
     if not df.empty:
-        df["Date"] = pd.to_datetime(df["Date"])
+        df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d", errors="coerce")  # Fix date format
+        df = df.dropna(subset=["Date"])  # Remove invalid date values
         df = df.sort_values("Date")
         
         fig, ax = plt.subplots(figsize=(8, 5), facecolor="white")  # White outer background
