@@ -82,33 +82,44 @@ elif page == "Analysis":
     df = load_data()
     
     if not df.empty:
-        df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d", errors="coerce")  
-        df = df.dropna(subset=["Date"])  
+        # Convert Date column to datetime format
+        df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m-%d", errors="coerce")
+        df = df.dropna(subset=["Date"])  # Remove invalid dates
         df = df.sort_values("Date")
 
-        fig, ax = plt.subplots(figsize=(8, 5), facecolor="white")  
-        ax.set_facecolor("#0d1b2a")  
+        # Create figure and axis
+        fig, ax = plt.subplots(figsize=(8, 5), facecolor="white")  # White outer background
+        ax.set_facecolor("#0d1b2a")  # Dark charcoal grey for inside graph
 
-        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', color='#FF6700', linewidth=2, markersize=6, markerfacecolor='#002147')  
-        ax.grid(color="#555555", linestyle="--", linewidth=0.6)  
+        # Plot data
+        ax.plot(df["Date"], df["Amount"], marker='o', linestyle='-', color='#FF6700', 
+                linewidth=2, markersize=6, markerfacecolor='#002147')  # Orange line & Dark Blue dots
+        ax.grid(color="#555555", linestyle="--", linewidth=0.6)  # Medium grey grid
 
-        # Fix: Format X-axis labels correctly**
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))  # Format as YYYY-MM-DD
-        ax.xaxis.set_major_locator(mdates.DayLocator(interval=1))  # Show every day's label
-        plt.xticks(rotation=45, color='black')  # Rotate for better visibility
-
+        # Add text labels for each data point
         for i, row in df.iterrows():
-            ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", fontsize=9, color='white', verticalalignment='bottom')
+            ax.text(row["Date"], row["Amount"], f"₹{row['Amount']:.2f}", fontsize=9, 
+                    color='white', verticalalignment='bottom')
 
+        # Set labels and title
         ax.set_xlabel("Date", fontsize=12, color='black')
         ax.set_ylabel("Amount Spent (₹)", fontsize=12, color='black')
         ax.set_title("Spending Trend", fontsize=14, color='black')
 
+        # Fix the x-axis date formatting
+        from matplotlib.dates import DateFormatter, DayLocator
+        ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))  # Format as YYYY-MM-DD
+        ax.xaxis.set_major_locator(DayLocator(interval=1))  # Adjust interval for better readability
+
+        plt.xticks(rotation=45, color='black')  # Rotate x-axis labels
         plt.yticks(color='black')
 
+        # Show plot in Streamlit
         st.pyplot(fig)
+
     else:
         st.warning("🚨 No data available for analysis.")
+
 
 
 
