@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter, DayLocator
 
 # Define the directory and CSV file path
 DATA_DIR = "data"
