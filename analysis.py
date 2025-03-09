@@ -1,25 +1,20 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-import database
+import database  # Import database functions
 
 def plot_expense_distribution():
-    # Fetch all expenses from the database.
-    df = database.get_expenses()
-    if df.empty:
-        print("No data available for analysis.")
-        return None
+    expenses = database.get_expenses()  # Fetch expenses from database.py
+    
+    if expenses.empty:  # Correct way to check if DataFrame is empty
+        print("\u26A0 No data available for visualization.")  # ⚠️
+        return
 
-    # Create a figure for the bar plot.
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.barplot(x="category", y="amount", data=df, ax=ax)
-    ax.set_title("Expense Distribution by Category")
-    # Rotate category labels for better readability.
+    plt.figure(figsize=(8, 5))
+    sns.barplot(x="category", y="amount", data=expenses)
+    plt.title("Expense Distribution by Category")
     plt.xticks(rotation=45)
-    plt.tight_layout()
-    return fig
+    plt.show()
 
-# If you run analysis.py directly, display the plot.
+# Testing visualization
 if __name__ == "__main__":
-    fig = plot_expense_distribution()
-    if fig:
-        plt.show()
+    plot_expense_distribution()
