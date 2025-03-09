@@ -6,7 +6,7 @@ def plot_expense_distribution():
     expenses = database.get_expenses()  # Fetch expenses from database.py
     
     if expenses.empty:  # Correct way to check if DataFrame is empty
-        print("\u26A0 No data available for visualization.")  # ⚠️
+        print("\u26A0\uFE0F No data available for visualization.")  # ⚠️
         return
 
     plt.figure(figsize=(8, 5))
