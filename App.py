@@ -16,10 +16,10 @@ if not os.path.exists(CSV_FILE) or os.path.getsize(CSV_FILE) == 0:
     df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
     df.to_csv(CSV_FILE, index=False)
 
-st.title("💰 Smart Expense Tracker - CSV Based")
+st.title("\U0001F4B0 Smart Expense Tracker - CSV Based")
 
 # Show CSV path for debugging
-st.sidebar.write(f"📁 CSV Path: `{CSV_FILE}`")
+st.sidebar.write(f"\U0001F4C1 CSV Path: `{CSV_FILE}`")
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
@@ -34,7 +34,7 @@ def add_expense(date, category, amount, description):
     df = pd.DataFrame([[date, category, amount, description]], 
                       columns=["Date", "Category", "Amount", "Description"])
     df.to_csv(CSV_FILE, mode='a', index=False, header=False)  # Append data
-    st.success("✅ Expense added successfully!")
+    st.success("\U00002705 Expense added successfully!")
 
 # Home Page
 if page == "Home":
@@ -43,42 +43,42 @@ if page == "Home":
 
 # Add Expense Page
 elif page == "Add Expense":
-    st.subheader("📝 Add a New Expense")
-    date = st.date_input("📅 Date")
-    category = st.selectbox("📂 Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
-    amount = st.number_input("💰 Amount (₹)", min_value=1.0)
-    description = st.text_area("📝 Description")
+    st.subheader("\U0001F4DD Add a New Expense")
+    date = st.date_input("\U0001F4C5 Date")
+    category = st.selectbox("\U0001F4C2 Category", ["Food", "Transport", "Shopping", "Bills", "Other"])
+    amount = st.number_input("\U0001F4B0 Amount (₹)", min_value=1.0)
+    description = st.text_area("\U0001F4DD Description")
 
-    if st.button("➕ Add Expense"):
+    if st.button("\U00002795 Add Expense"):
         add_expense(date, category, amount, description)
 
 # View Expenses Page
 elif page == "View Expenses":
-    st.subheader("📄 Your Expenses")
+    st.subheader("\U0001F4C4 Your Expenses")
     df = load_data()
     if df.empty:
-        st.warning("🚨 No expenses recorded yet.")
+        st.warning("\U0001F6A8 No expenses recorded yet.")
     else:
         st.dataframe(df)
         
         # Add Download CSV Button
         csv_data = df.to_csv(index=False).encode("utf-8")
         st.download_button(
-            label="⬇️ Download CSV", 
+            label="\U0001F4E5 Download CSV", 
             data=csv_data, 
             file_name="expenses.csv", 
             mime="text/csv"
         )
     
     # Add a reset button
-    if st.button("🗑 Reset All Expenses"):
+    if st.button("\U0001F5D1 Reset All Expenses"):
         df = pd.DataFrame(columns=["Date", "Category", "Amount", "Description"])
         df.to_csv(CSV_FILE, index=False)
-        st.warning("🚨 All expenses have been cleared!")
+        st.warning("\U0001F6A8 All expenses have been cleared!")
 
 # Analysis Page
 elif page == "Analysis":
-    st.subheader("📊 Expense Analysis")
+    st.subheader("\U0001F4CA Expense Analysis")
     df = load_data()
     
     if not df.empty:
@@ -107,7 +107,6 @@ elif page == "Analysis":
         ax.set_title("Spending Trend", fontsize=14, color='black')
 
         # Fix the x-axis date formatting
-        from matplotlib.dates import DateFormatter, DayLocator
         ax.xaxis.set_major_formatter(DateFormatter("%Y-%m-%d"))  # Format as YYYY-MM-DD
         ax.xaxis.set_major_locator(DayLocator(interval=1))  # Adjust interval for better readability
 
@@ -116,46 +115,33 @@ elif page == "Analysis":
 
         # Show plot in Streamlit
         st.pyplot(fig)
-
     else:
-        st.warning("🚨 No data available for analysis.")
-
-
-
+        st.warning("\U0001F6A8 No data available for analysis.")
 
 # Budget & Insights Page
 elif page == "Budget & Insights":
-    st.subheader("📈 Budget & Smart Insights")
+    st.subheader("\U0001F4C8 Budget & Smart Insights")
     df = load_data()
     
     if df.empty:
-        st.warning("🚨 No expenses recorded yet.")
+        st.warning("\U0001F6A8 No expenses recorded yet.")
     else:
-        salary = st.number_input("💵 Enter Your Monthly Salary (₹)", min_value=1000.0)
+        salary = st.number_input("\U0001F4B5 Enter Your Monthly Salary (₹)", min_value=1000.0)
         daily_budget = salary / 30
         total_spent = df["Amount"].sum()
         estimated_budget = salary  # Full monthly salary as budget
         
-        st.write(f"📊 Your estimated monthly budget: ₹{estimated_budget:.2f}")
-        st.write(f"💰 Total spent so far: ₹{total_spent:.2f}")
+        st.write(f"\U0001F4CA Your estimated monthly budget: ₹{estimated_budget:.2f}")
+        st.write(f"\U0001F4B0 Total spent so far: ₹{total_spent:.2f}")
         
         insights = []
         percentage_spent = (total_spent / estimated_budget) * 100 if estimated_budget > 0 else 0
         
         if total_spent > estimated_budget:
-            insights.append("⚠️ You've exceeded your budget! Consider reducing expenses.")
+            insights.append("\U000026A0 You've exceeded your budget! Consider reducing expenses.")
         elif percentage_spent > 80:
-            insights.append("🚨 You've spent 80% of your budget. Slow down on expenses!")
+            insights.append("\U0001F6A8 You've spent 80% of your budget. Slow down on expenses!")
         elif percentage_spent < 50:
-            insights.append("✅ You're on track! Keep up the good spending habits.")
+            insights.append("\U00002705 You're on track! Keep up the good spending habits.")
         
-        category_spending = df.groupby("Category")["Amount"].sum()
-        for category, amount in category_spending.items():
-            if category == "Food" and amount > total_spent * 0.5:
-                insights.append("🍔 You're spending a lot on Food! Consider meal planning to save money.")
-            if category == "Transport" and amount > total_spent * 0.3:
-                insights.append("🚗 High transport costs! Try public transport or carpooling.")
-            if category == "Shopping" and amount > total_spent * 0.3:
-                insights.append("🛍️ Excessive shopping detected! Set a shopping limit to avoid overspending.")
-        
-        st.write("\n".join(insights) if insights else "✅ Your spending is well-balanced!")
+        st.write("\n".join(insights) if insights else "\U00002705 Your spending is well-balanced!")
