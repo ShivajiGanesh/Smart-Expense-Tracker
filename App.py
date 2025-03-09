@@ -138,7 +138,7 @@ elif page == "Budget & Insights":
         percentage_spent = (total_spent / estimated_budget) * 100 if estimated_budget > 0 else 0
         
         if total_spent > estimated_budget:
-            insights.append("\U000026A0 You've exceeded your budget! Consider reducing expenses.")
+            insights.append("\u26A0\uFE0F You've exceeded your budget! Consider reducing expenses.")
         elif percentage_spent > 80:
             insights.append("\U0001F6A8 You've spent 80% of your budget. Slow down on expenses!")
         elif percentage_spent < 50:
