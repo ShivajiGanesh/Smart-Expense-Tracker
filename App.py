@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 from matplotlib.dates import DateFormatter, DayLocator
+from voice_entry import render_voice_entry
 
 # Define the directory and CSV file path
 DATA_DIR = "data"
@@ -23,7 +24,7 @@ st.sidebar.write(f"\U0001F4C1 CSV Path: `{CSV_FILE}`")
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
-page = st.sidebar.radio("Go to", ["Home", "Add Expense", "View Expenses", "Analysis", "Budget & Insights"])
+page = st.sidebar.radio("Go to", ["Home", "Add Expense", "Voice Entry (Prototype)", "View Expenses", "Analysis", "Budget & Insights"])
 
 # Function to load data (forces refresh)
 def load_data():
@@ -51,6 +52,10 @@ elif page == "Add Expense":
 
     if st.button("\U00002795 Add Expense"):
         add_expense(date, category, amount, description)
+
+# Voice Entry Prototype Page
+elif page == "Voice Entry (Prototype)":
+    render_voice_entry()
 
 # View Expenses Page
 elif page == "View Expenses":
