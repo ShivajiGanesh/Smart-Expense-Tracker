@@ -1,7 +1,7 @@
 """Voice expense-entry prototype.
 
-This module deliberately keeps audio capture and parsing separate from persistence.
-Speech-to-text and saving are not enabled until a supported recognition provider is configured.
+Audio capture and parsing are separate from persistence. Speech-to-text and saving
+remain disabled until a supported recognition provider and storage flow are configured.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ CATEGORY_ALIASES = {
     ),
     "Food / Groceries": (
         "food", "lunch", "dinner", "breakfast", "groceries", "grocery",
-        "భోజనం", "తిండి", "కూరగాయలు", "खाना", "भोजन", "किराना",
+        "భోజనం", "తిండి", "కూరగాయలు", "खाना", "खाने", "भोजन", "किराना",
     ),
     "Transport": (
         "bus", "train", "metro", "auto", "cab", "transport",
@@ -45,15 +45,18 @@ class ExpenseDraft:
 
 def parse_expense_text(text: str) -> ExpenseDraft:
     """Extract a likely amount and category from a natural-language transcript."""
+    normalized = text.replace(",", "")
     amount_match = re.search(
-        r"(?<![\w.])(?:₹\s*)?(\d+(?:,\d{3})*(?:\.\d{1,2})?)(?![\w.])",
-        text.replace("rupees", " ",).replace("रुपये", " "),
+        r"(?<![\w.])(?:₹\s*)?(\d+(?:\.\d{1,2})?)(?![\w.])",
+        normalized,
         flags=re.IGNORECASE,
     )
     amount = None
     if amount_match:
         try:
-            amount = float(amount_match.group(1).replace(",", ""))
+            amount = float(amount_match.group(1))
+            if amount <= 0:
+                amount = None
         except ValueError:
             amount = None
 
@@ -71,7 +74,7 @@ def render_voice_entry() -> None:
     st.header("Voice Expense Entry")
     st.caption(
         "Speak naturally in Telugu, Hindi, English, or a mix. "
-        "The current prototype previews recognition results; it does not save expenses."
+        "This prototype previews recognition results; it does not save expenses."
     )
 
     language = st.selectbox(
@@ -100,29 +103,100 @@ def render_voice_entry() -> None:
             'Example: "Ninna petrol ki 200 rupees pettanu" or '
             '"आज खाने पर 250 रुपये खर्च किए"'
         ),
-        help="For this UI prototype, enter the transcript here to test amount/category extraction.",
+        help="Enter a transcript here to test amount and category extraction.",
         key="voice_expense_transcript",
     )
 
     if st.button("Preview expense", type="primary"):
         if not transcript.strip():
-            st.warning("Record audio and connect speech recognition, or enter a transcript to preview.")
+            st.warning("Enter a transcript to preview. Audio transcription is not connected yet.")
             return
+        st.session_state["voice_expense_draft"] = parse_expense_text(transcript).__dict__
+        st.session_state.pop("voice_expense_correction", None)
 
-        draft = parse_expense_text(transcript)
-        st.subheader("Detected expense")
-        left, right = st.columns(2)
-        left.metric("Amount", f"₹{draft.amount:,.2f}" if draft.amount is not None else "Not detected")
-        right.metric("Category", draft.category or "Choose category")
+    draft_data = st.session_state.get("voice_expense_draft")
+    if not draft_data:
+        return
 
-        if draft.amount is None or draft.category is None:
-            st.warning("Some details are unclear. Choose a suggestion or enter the transcript again.")
-            options = ["Fuel", "Food / Groceries"] if draft.category is None else ["Amount is correct", "Re-enter amount"]
-            choice = st.radio("Quick options", options, horizontal=True, key="voice_expense_quick_choice")
-            if st.button("Use selected option", key="voice_expense_use_choice"):
-                st.session_state["voice_expense_selected_choice"] = choice
-                st.info(f"Selected: {choice}. Saving is not enabled in this prototype.")
-            st.caption("Neither option fits? Edit the transcript above and preview again.")
+    amount = draft_data["amount"]
+    category = draft_data["category"]
+    correction = st.session_state.get("voice_expense_correction")
+    if correction and correction.get("transcript") == draft_data["transcript"]:
+        if correction.get("category"):
+            category = correction["category"]
+        if correction.get("amount") is not None:
+            amount = correction["amount"]
 
-        st.caption(f"Language mode: {language}")
-        st.caption("No expense has been written to CSV or SQLite.")
+    st.subheader("Detected expense")
+    left, right = st.columns(2)
+    left.metric("Amount", f"₹{amount:,.2f}" if amount is not None else "Not detected")
+    right.metric("Category", category or "Choose category")
+
+    if amount is None and category is None:
+        st.warning("The amount and category are unclear.")
+        choice = st.radio(
+            "Choose what to correct",
+            ["Enter amount", "Choose category"],
+            horizontal=True,
+            key="voice_expense_missing_both",
+        )
+        if choice == "Enter amount":
+            manual_amount = st.number_input(
+                "Amount (₹)", min_value=0.01, step=1.0, key="voice_expense_manual_amount"
+            )
+            if st.button("Apply amount", key="voice_expense_apply_amount"):
+                st.session_state["voice_expense_correction"] = {
+                    "transcript": draft_data["transcript"], "amount": manual_amount
+                }
+                st.rerun()
+        else:
+            selected_category = st.radio(
+                "Category",
+                ["Petrol / Fuel", "Food / Groceries"],
+                horizontal=True,
+                key="voice_expense_category_both",
+            )
+            if st.button("Apply category", key="voice_expense_apply_category_both"):
+                st.session_state["voice_expense_correction"] = {
+                    "transcript": draft_data["transcript"], "category": selected_category
+                }
+                st.rerun()
+    elif category is None:
+        st.warning("Choose the closest category, or edit the transcript and preview again.")
+        choice = st.radio(
+            "Quick options",
+            ["Petrol / Fuel", "Food / Groceries"],
+            horizontal=True,
+            key="voice_expense_quick_choice",
+        )
+        if st.button("Apply selected category", key="voice_expense_use_choice"):
+            st.session_state["voice_expense_correction"] = {
+                "transcript": draft_data["transcript"], "category": choice
+            }
+            st.rerun()
+    elif amount is None:
+        st.warning("The amount is unclear.")
+        choice = st.radio(
+            "Quick options",
+            ["Enter amount", "Edit transcript and try again"],
+            horizontal=True,
+            key="voice_expense_amount_choice",
+        )
+        if choice == "Enter amount":
+            manual_amount = st.number_input(
+                "Amount (₹)", min_value=0.01, step=1.0, key="voice_expense_manual_amount_only"
+            )
+            if st.button("Apply amount", key="voice_expense_apply_amount_only"):
+                st.session_state["voice_expense_correction"] = {
+                    "transcript": draft_data["transcript"], "amount": manual_amount
+                }
+                st.rerun()
+        else:
+            st.caption("Edit the transcript above and select Preview expense again.")
+
+    if amount is not None and category is not None:
+        st.success(f"Draft ready: ₹{amount:,.2f} · {category}")
+        st.caption("This is a preview only. No expense has been written to CSV or SQLite.")
+
+    st.caption(f"Language mode: {language}")
+    st.caption("Neither quick option fits? Edit the transcript above and preview again.")
